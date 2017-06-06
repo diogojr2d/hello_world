@@ -12,7 +12,7 @@ Bot::Bot() : board() {
 
 void Bot::MakeMove(BoardMoves boardMove) {
   switch (boardMove) {
-    case UP:    printf("up\n"); break;
+    case UP:    printf("up\n"); fprintf(stderr, "dbg went up\n"); break;
     case DOWN:  printf("down\n"); break;
     case LEFT:  printf("left\n"); break;
     case RIGHT: printf("right\n"); break;
@@ -21,20 +21,24 @@ void Bot::MakeMove(BoardMoves boardMove) {
 
 void Bot::Move(int time) {
   countGeral = 0;
-  int pos[2] = {posX, posY};
-  vector<BoardMoves> moves = board.LegalMoves(pos);
-  if(moves.size() == 0){
-    MakeMove(UP);
-    return;
-  }
+  BoardMoves moves[4] = {UP, LEFT, DOWN, RIGHT};
+  unsigned int finalDirection = 0;
+
+  finalDirection = MoveAdv(moves, posX, posY);
+  
+  MakeMove(moves[finalDirection]);
+}
+
+unsigned int Bot::MoveAdv(BoardMoves* moves, int x, int y) {
+  int pos[2] = {x, y};
   unsigned int finalDirection = 0;
   unsigned int dirs[4] = {0, 0, 0, 0};
-  for (int i = 0; i < moves.size(); i++) {
-    dirs[i] = TryMove(moves[i], posX, posY);
-  }
-  finalDirection = maxMoves(dirs);
 
-  MakeMove(moves[finalDirection]);
+  for (int i = 0; i < 4; i++) {
+    dirs[i] = TryMove(moves[i], x, y);
+  }
+  
+  finalDirection = maxMoves(dirs);
 }
 
 unsigned int Bot::TryMove(BoardMoves boardMove, int x, int y) {
@@ -54,14 +58,14 @@ unsigned int Bot::TryMove(BoardMoves boardMove, int x, int y) {
     xCur += dx;
     yCur += dy;
   }
-  countGeral++;
-  if (countGeral <= 1) {
-    int pos[2] = {xCur-dx, yCur-dy};
-    vector<BoardMoves> moves = board.LegalMoves(pos);
+  if (countGeral < 1) {
+    countGeral++;
+    BoardMoves moves[4] = {UP, LEFT, DOWN, RIGHT};
+    MoveAdv(moves, xCur-dx, yCur-dy);
 
     unsigned int finalDirection = 0;
     unsigned int dirs[4] = {0, 0, 0, 0};
-    for (int i = 0; i < moves.size(); i++) {
+    for (int i = 0; i < 4; i++) {
       dirs[i] = TryMove(moves[i], xCur-dx, yCur-dy);
     }
     finalDirection = maxMoves(dirs);  
